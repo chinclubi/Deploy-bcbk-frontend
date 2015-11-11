@@ -1,0 +1,109 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="true" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand navText page-scroll" ui-sref="home">
+                <p class="nav-brand-text">{bcbk}</p>
+            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse" id="navbar" aria-expanded="false">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'schedule'})">
+                        <p class="nav-link-text">Schedule</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'location'})">
+                        <p class="nav-link-text">Location</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'sponsors'})">
+                        <p class="nav-link-text">Sponsors</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'register'})">
+                        <p class="nav-link-text">Register</p>
+                    </a>
+                </li>
+                <li>
+                    <a ui-sref="whoscoming({reload:true})">
+                        <p class="nav-link-text">Who's Coming</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="sub-page-cover">
+
+    <div class="container topic">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12 text-center topic">
+                <h1>WHO'S COMING</h1>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="sub-page-content who-is-coming">
+
+    <div class="container filter">
+
+            <ui-select ng-model="WhoscomingCtrl.filter.selected" multiple>
+                <ui-select-match placeholder="Filter by interest">{{$item}}</ui-select-match>
+                <ui-select-choices repeat="interest in WhoscomingCtrl.interests | filter:$select.search">
+                    {{interest}}
+                </ui-select-choices>
+            </ui-select>
+
+    </div>
+    <div class="container content">
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 50px;" class="index"></th>
+                <th>Name</th>
+                <th>Twitter</th>
+                <th>Interest</th>
+                <th>Website</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="person in WhoscomingCtrl.find(WhoscomingCtrl.people, WhoscomingCtrl.filter.selected)">
+                <td class="index">{{$index+1}}.</td>
+                <td>
+                    <div ng-bind="person.name"></div>
+                    <small ng-if="person.profession || person.workplace">
+                        {{person.profession}}<span ng-if="person.profession && person.workplace">, </span>{{person.workplace}}
+                    </small>
+                </td>
+                <td>
+                    <div ng-if="person.twitter">
+                        @<a href="https://twitter.com/{{person.twitter}}" ng-bind="person.twitter"></a>
+                    </div>
+                </td>
+                <td>
+                    <span ng-repeat="interest in person.interests">
+                        <span ng-bind="interest"></span><span ng-repeat-end ng-if="!$last">, </span>
+                    </span>
+                </td>
+                <td>
+                    <a ng-href="http://{{person.website}}" ng-bind="person.website"></a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="footer" class="footer" ng-include src="'templates/footer.html'"></section>

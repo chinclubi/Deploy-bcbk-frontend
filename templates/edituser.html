@@ -1,0 +1,268 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header page-scroll">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="true" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand navText page-scroll" ui-sref="home">
+                <p class="nav-brand-text">{bcbk}</p>
+            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse" id="navbar">
+            <ul class="nav navbar-nav">
+                <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'schedule'})">
+                        <p class="nav-link-text">Schedule</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'location'})">
+                        <p class="nav-link-text">Location</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'sponsors'})">
+                        <p class="nav-link-text">Sponsors</p>
+                    </a>
+                </li>
+                <li>
+                    <a class="page-scroll" ui-sref="home({section: 'register'})">
+                        <p class="nav-link-text">Register</p>
+                    </a>
+                </li>
+                <li>
+                    <a ui-sref="whoscoming({reload:true})">
+                        <p class="nav-link-text">Who's Coming</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="sub-page-cover section">
+
+    <div class="container topic">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12 text-center topic">
+                <h1>EDIT PROFILE</h1>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="sub-page-content register">
+    <div ng-controller="EditUserController">
+        <div id="register-form" class="container register-form">
+            <form name="edit" novalidate ng-submit="editCtrl.submit()">
+                <div class="row basic-info">
+
+                    <div name="emailform" class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Email</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="email" class="form-control" ng-model="editCtrl.email" name="email"
+                                       data-error="The email cannot be changed" disabled>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>First Name <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span></label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" ng-class="{'with-error':edit.firstname.$invalid && edit.firstname.$dirty, 'with-success':edit.firstname.$valid && edit.firstname.$dirty}" name="firstname" class="form-control" ng-model="editCtrl.firstname" required>
+                            <span ng-show="edit.firstname.$dirty && edit.firstname.$invalid">
+                                <div id="firstname-status" class="help-block with-error-txt" ng-show="edit.firstname.$error.required">
+                                    Please enter your first name.
+                                </div>
+                            </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Last Name <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span></label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" ng-class="{'with-error':edit.lastname.$invalid && edit.lastname.$dirty, 'with-success':edit.lastname.$valid && edit.lastname.$dirty}" name="lastname" class="form-control" ng-model="editCtrl.lastname" required>
+                            <span ng-show="edit.lastname.$dirty && edit.lastname.$invalid">
+                            <div id="lastname-status" class="help-block with-error-txt" ng-show="edit.lastname.$error.required">
+                                Please enter your last name.
+                            </div>
+                            </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Gender</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <select ng-model="editCtrl.gender.data"
+                                    ng-options="v for v in editCtrl.gender.availableGender" class="form-control">
+                            </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Profession</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" ng-model="editCtrl.profession">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Workplace</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" ng-model="editCtrl.workplace">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Twitter</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <div class="input-group-addon">@</div>
+                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15"
+                                           class="form-control" ng-model="editCtrl.twitter" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6">
+                                <label>Website</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" ng-model="editCtrl.website">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+                            <div class="col-sm-6 ">
+                                <label>Special meals</label>
+                            </div>
+                            <div class="col-sm-6">
+                                <select ng-model="editCtrl.foodRequirement.data"
+                                        ng-options="v for v in editCtrl.foodRequirement.available" class="form-control">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row col-sm-12">
+
+                            <div class="col-sm-6">
+                                <label>Food Allergy</label>
+
+                                <p>(อาหารที่แพ้)</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" ng-model="editCtrl.allergy">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row text-center interest" ng-class="{'interest-with-error':edit.interest.$invalid && edit.interest.$dirty, 'interest-with-success':edit.interest.$valid && edit.interest.$dirty}">
+                        <div class="col-lg-12 col-xs-12 text-center topic">
+                            <h1>Interests <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span></h1>
+                        </div>
+                        <div class="col-sm-12">
+                            <p>Seperated by ","</p>
+                            <ui-select 
+                                name="interest"  
+                                class = "text-left"
+                                ng-model="editCtrl.interest.selected" 
+                                tagging tagging-tokens="ENTER|,|TAB" 
+                                interest="editCtrl.interest.selected" multiple> 
+                                <ui-select-match placeholder="Angular, JavaScript, UX/UI, Food, Startup, ....">{{$item}}
+                                </ui-select-match>
+                                <ui-select-choices style="display: none;" repeat="tmp in editCtrl.tmps | filter:$select.search">
+                                    {{tmp}}
+                                </ui-select-choices>
+                            </ui-select>
+                            <span ng-show="edit.interest.$dirty && edit.interest.$invalid">
+                                <div id="interest-status" class="help-block with-error-txt" ng-show="edit.interest.$error.isEmpty">
+                                    Please share your interest to us.
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+
+                <div class="row text-center">
+                    <div class="form-group button-wrap">
+                        <button id="update-btn" type="submit" class="dark-btn hvr-fade">UPDATE</button>
+                        <div id="loading">
+                            <div class="spinner"></div>
+                            Updating...
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <div id="success-registration" class="container text-center success-registration">
+            <div class="row">
+                <div style="font-size: 30px;">
+                    <i class="fa fa-check fa-5x"></i>
+                </div>
+            </div>
+            <div class="row">
+                <h2>Update Successfully</h2>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <p>Your registration is successfully updated!</p>
+                    <br />
+                    <p>In either case, check your name at <b>Who's coming</b> and see you at BarCamp Bangkhen 6.</p>
+                </div>
+            </div>
+            <div class="row">
+                <button class="dark-btn hvr-fade" role="button"
+                        ng-click="editCtrl.editpage()">BACK
+                </button>
+                <a ui-sref="whoscoming">
+                    <button class="dark-btn hvr-fade" role="button">
+                        WHO'S COMING
+                    </button>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section id="footer" class="footer" ng-include src="'templates/footer.html'"></section>
