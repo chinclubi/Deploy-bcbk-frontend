@@ -28097,9 +28097,8 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
     function checkEmail () {
       var deferred = $q.defer()
       $http({
-        method: 'POST',
-        url: 'http://api.barcampbangkhen.org/checkemail',
-        data: {'email': self.email}
+        method: 'GET',
+        url: 'http://api.barcampbangkhen.org/checkemail?email=' + self.email
       }).success(function (response, status) {
         $scope.register.$setValidity('emailvalid', true)
         $scope.register.$setValidity('emailsame', true)
@@ -28217,37 +28216,36 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
   emailcheck.$inject = ['$http', '$timeout']
   function emailcheck ($http, $timeout) {
     var checking = null
-    var form = {
-      email: $('[name="email"]'),
-      emailStatus: $('#email-status')
-    }
     return {
       require: 'ngModel',
       link: function (scope, ele, attrs, c) {
         var checkEmail = function () {
-          if (!checking && c.$modelValue) {
+          var emailValue = c.$modelValue
+          if (!checking && emailValue) {
             checking = $timeout(function () {
               $http({
-                method: 'POST',
-                url: 'http://api.barcampbangkhen.org/checkemail',
-                data: {'email': c.$modelValue}
+                method: 'GET',
+                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
               }).success(function (response, status) {
-                form.emailStatus.text('')
-                form.emailStatus.hide()
                 c.$setValidity('emailvalid', true)
                 c.$setValidity('emailsame', true)
                 checking = null
               }).error(function (response, status) {
-                if (status === 401) {
-                  c.$setValidity('emailsame', true)
-                  c.$setValidity('emailvalid', false)
-                } else if (status === 402) {
-                  c.$setValidity('emailsame', false)
-                  c.$setValidity('emailvalid', true)
+                if (!c.$error.required || !c.$error.email) {
+                  if (status === 401) {
+                    c.$setValidity('emailsame', true)
+                    c.$setValidity('emailvalid', false)
+                  } else if (status === 402) {
+                    c.$setValidity('emailsame', false)
+                    c.$setValidity('emailvalid', true)
+                  }
+                  checking = null
                 }
-                checking = null
               })
             }, 500)
+          } else {
+            c.$setValidity('emailvalid', true)
+            c.$setValidity('emailsame', true)
           }
         }
         scope.$watch(attrs.ngModel, checkEmail)
@@ -28272,11 +28270,11 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
         scope.$watch(attrs.ngModel, function () {
           checking = $timeout(function () {
             if (!c.$modelValue) {
-              c.$setValidity('required', false)
+              c.$setValidity('empty', false)
             }else if (c.$modelValue.length === 0) {
-              c.$setValidity('required', false)
+              c.$setValidity('empty', false)
             } else {
-              c.$setValidity('required', true)
+              c.$setValidity('empty', true)
             }
             checking = null
           })
