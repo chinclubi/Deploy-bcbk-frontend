@@ -9226,11 +9226,6 @@ return jQuery;
       'directive.interestValidation'
     // 'directive.navbar'
     ])
-  $(window).resize(function () {
-    console.log('resize')
-    $('#bg').height($(window).height() + 60)
-  })
-
 })()
 
 /*! jQuery UI - v1.11.4 - 2015-03-11
