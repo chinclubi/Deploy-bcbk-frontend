@@ -108,10 +108,10 @@
                 </div>
                 <span ng-show="resendCtrl.submit.isSubmit">
                     <div class="help-block with-error-txt" ng-show="resendCtrl.submit.status === 403">
-                        This email does not exist (<b>{{self.email}}</b>). Please create your new accout
+                        This email does not exist (<b>{{resendCtrl.email}}</b>). Please create your new accout
                     </div>
                     <div class="help-block with-error-txt" ng-show="resendCtrl.submit.status === 405">
-                        Cannot send email to <b>{{self.email}}</b>. Please contact info@barcampbangkhen.org
+                        Cannot send email to <b>{{resendCtrl.email}}</b>. Please contact info@barcampbangkhen.org
                     </div>
                 </span>
             </div>
