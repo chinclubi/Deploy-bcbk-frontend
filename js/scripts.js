@@ -28317,9 +28317,6 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
     form.successForm.hide()
 
     function resend () {
-      form.resendBtn.hide()
-      form.load.show()
-      self.submit.isSubmit = true
       if ($scope.resend.$invalid) {
         if ($scope.resend.$error.required) {
           angular.forEach($scope.resend.$error.required, function (value, key) {
@@ -28335,6 +28332,9 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
           })
         }
       } else {
+        form.resendBtn.hide()
+        form.load.show()
+        self.submit.isSubmit = true
         $http({
           method: 'POST',
           url: 'http://api.barcampbangkhen.org/resend',
