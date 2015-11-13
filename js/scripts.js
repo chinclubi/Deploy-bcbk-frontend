@@ -27780,130 +27780,6 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 
 /* global angular */
 /* global $ */
-
-;(function () {
-  angular.module('directive.validation', [])
-    .directive('emailcheck', emailcheck)
-
-  emailcheck.$inject = ['$http', '$timeout']
-  function emailcheck ($http, $timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        var checkEmail = function () {
-          var emailValue = c.$modelValue
-          if (!checking && emailValue) {
-            checking = $timeout(function () {
-              $http({
-                method: 'GET',
-                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
-              }).success(function (response, status) {
-                c.$setValidity('emailvalid', true)
-                c.$setValidity('emailsame', true)
-                checking = null
-              }).error(function (response, status) {
-                if (!c.$error.required || !c.$error.email) {
-                  if (status === 401) {
-                    c.$setValidity('emailsame', true)
-                    c.$setValidity('emailvalid', false)
-                  } else if (status === 402) {
-                    c.$setValidity('emailsame', false)
-                    c.$setValidity('emailvalid', true)
-                  }
-                  checking = null
-                }
-              })
-            }, 500)
-          } else {
-            c.$setValidity('emailvalid', true)
-            c.$setValidity('emailsame', true)
-          }
-        }
-        scope.$watch(attrs.ngModel, checkEmail)
-      }
-    }
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.interestValidation', [])
-    .directive('interest', interest)
-
-  interest.$inject = ['$timeout']
-  function interest ($timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        scope.$watch(attrs.ngModel, function () {
-          checking = $timeout(function () {
-            if (!c.$modelValue) {
-              c.$setValidity('empty', false)
-            }else if (c.$modelValue.length === 0) {
-              c.$setValidity('empty', false)
-            } else {
-              c.$setValidity('empty', true)
-            }
-            checking = null
-          })
-        }, 500)
-      }
-    }
-  }
-})()
-
-/* global angular */
-
-;(function () {
-  angular
-    .module('services.route', ['ui.router'])
-    .config(config)
-
-  config.$inject = ['$stateProvider', '$urlRouterProvider']
-
-  function config ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.when('', '/home')
-    $urlRouterProvider.otherwise('/home')
-    $stateProvider
-      .state('home', {
-        url: '/home?section',
-        templateUrl: 'templates/home.tmpl',
-        controller: 'HomePageController',
-        controllerAs: 'homepageCtrl'
-      })
-      .state('whoscoming', {
-        url: '/whoscoming',
-        templateUrl: 'templates/whoscoming.html',
-        controller: 'WhoscomingController',
-        controllerAs: 'WhoscomingCtrl'
-      })
-      .state('edituser', {
-        url: '/editprofile?email&c',
-        templateUrl: 'templates/edituser.html',
-        controller: 'EditUserController',
-        controllerAs: 'editCtrl'
-      })
-      .state('resendmail', {
-        url: '/resend',
-        templateUrl: 'templates/resendmail.html',
-        controller: 'ResendMailController',
-        controllerAs: 'resendCtrl'
-      })
-      .state('about', {
-        url: '/about',
-        templateUrl: 'templates/about.html',
-        controller: 'AboutController',
-        controllerAs: 'AboutCtrl'
-      })
-  }
-})()
-
-/* global angular */
-/* global $ */
 /* global google */
 
 ;(function () {
@@ -28402,6 +28278,7 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 
     var self = this
     self.url = function (url) {
+      if (!url)  return
       console.log(url)
       var http = url.substring(0, 5)
       console.log(http)
@@ -28443,5 +28320,129 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
       })
       self.people = data
     })
+  }
+})()
+
+/* global angular */
+
+;(function () {
+  angular
+    .module('services.route', ['ui.router'])
+    .config(config)
+
+  config.$inject = ['$stateProvider', '$urlRouterProvider']
+
+  function config ($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.when('', '/home')
+    $urlRouterProvider.otherwise('/home')
+    $stateProvider
+      .state('home', {
+        url: '/home?section',
+        templateUrl: 'templates/home.tmpl',
+        controller: 'HomePageController',
+        controllerAs: 'homepageCtrl'
+      })
+      .state('whoscoming', {
+        url: '/whoscoming',
+        templateUrl: 'templates/whoscoming.html',
+        controller: 'WhoscomingController',
+        controllerAs: 'WhoscomingCtrl'
+      })
+      .state('edituser', {
+        url: '/editprofile?email&c',
+        templateUrl: 'templates/edituser.html',
+        controller: 'EditUserController',
+        controllerAs: 'editCtrl'
+      })
+      .state('resendmail', {
+        url: '/resend',
+        templateUrl: 'templates/resendmail.html',
+        controller: 'ResendMailController',
+        controllerAs: 'resendCtrl'
+      })
+      .state('about', {
+        url: '/about',
+        templateUrl: 'templates/about.html',
+        controller: 'AboutController',
+        controllerAs: 'AboutCtrl'
+      })
+  }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular.module('directive.validation', [])
+    .directive('emailcheck', emailcheck)
+
+  emailcheck.$inject = ['$http', '$timeout']
+  function emailcheck ($http, $timeout) {
+    var checking = null
+    return {
+      require: 'ngModel',
+      link: function (scope, ele, attrs, c) {
+        var checkEmail = function () {
+          var emailValue = c.$modelValue
+          if (!checking && emailValue) {
+            checking = $timeout(function () {
+              $http({
+                method: 'GET',
+                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
+              }).success(function (response, status) {
+                c.$setValidity('emailvalid', true)
+                c.$setValidity('emailsame', true)
+                checking = null
+              }).error(function (response, status) {
+                if (!c.$error.required || !c.$error.email) {
+                  if (status === 401) {
+                    c.$setValidity('emailsame', true)
+                    c.$setValidity('emailvalid', false)
+                  } else if (status === 402) {
+                    c.$setValidity('emailsame', false)
+                    c.$setValidity('emailvalid', true)
+                  }
+                  checking = null
+                }
+              })
+            }, 500)
+          } else {
+            c.$setValidity('emailvalid', true)
+            c.$setValidity('emailsame', true)
+          }
+        }
+        scope.$watch(attrs.ngModel, checkEmail)
+      }
+    }
+  }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular.module('directive.interestValidation', [])
+    .directive('interest', interest)
+
+  interest.$inject = ['$timeout']
+  function interest ($timeout) {
+    var checking = null
+    return {
+      require: 'ngModel',
+      link: function (scope, ele, attrs, c) {
+        scope.$watch(attrs.ngModel, function () {
+          checking = $timeout(function () {
+            if (!c.$modelValue) {
+              c.$setValidity('empty', false)
+            }else if (c.$modelValue.length === 0) {
+              c.$setValidity('empty', false)
+            } else {
+              c.$setValidity('empty', true)
+            }
+            checking = null
+          })
+        }, 500)
+      }
+    }
   }
 })()
