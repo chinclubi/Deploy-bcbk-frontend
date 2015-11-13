@@ -28193,6 +28193,9 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
     form.successForm.hide()
 
     function resend () {
+      form.resendBtn.fadeOut(function () {
+        form.load.fadeIn()
+      })
       self.submit.isSubmit = true
       if ($scope.resend.$invalid) {
         if ($scope.resend.$error.required) {
@@ -28217,9 +28220,16 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
             response: self.response
           }
         }).success(function (response, status) {
+          form.resendForm.fadeOut(function () {
+            form.load.hide()
+            form.successForm.fadeIn()
+          })
           self.submit.status = status
         }).error(function (response, status) {
           self.submit.status = status
+          form.load.fadeOut(function () {
+            form.resendBtn.fadeIn()
+          })
           if (status === 404) {
             vcRecaptchaService.reload(self.widgetId)
           }
@@ -28304,52 +28314,6 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 })()
 
 /* global angular */
-
-;(function () {
-  angular
-    .module('services.route', ['ui.router'])
-    .config(config)
-
-  config.$inject = ['$stateProvider', '$urlRouterProvider']
-
-  function config ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.when('', '/home')
-    $urlRouterProvider.otherwise('/home')
-    $stateProvider
-      .state('home', {
-        url: '/home?section',
-        templateUrl: 'templates/home.tmpl',
-        controller: 'HomePageController',
-        controllerAs: 'homepageCtrl'
-      })
-      .state('whoscoming', {
-        url: '/whoscoming',
-        templateUrl: 'templates/whoscoming.html',
-        controller: 'WhoscomingController',
-        controllerAs: 'WhoscomingCtrl'
-      })
-      .state('edituser', {
-        url: '/editprofile?email&c',
-        templateUrl: 'templates/edituser.html',
-        controller: 'EditUserController',
-        controllerAs: 'editCtrl'
-      })
-      .state('resendmail', {
-        url: '/resend',
-        templateUrl: 'templates/resendmail.html',
-        controller: 'ResendMailController',
-        controllerAs: 'resendCtrl'
-      })
-      .state('about', {
-        url: '/about',
-        templateUrl: 'templates/about.html',
-        controller: 'AboutController',
-        controllerAs: 'AboutCtrl'
-      })
-  }
-})()
-
-/* global angular */
 /* global $ */
 
 ;(function () {
@@ -28424,5 +28388,51 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
         }, 500)
       }
     }
+  }
+})()
+
+/* global angular */
+
+;(function () {
+  angular
+    .module('services.route', ['ui.router'])
+    .config(config)
+
+  config.$inject = ['$stateProvider', '$urlRouterProvider']
+
+  function config ($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.when('', '/home')
+    $urlRouterProvider.otherwise('/home')
+    $stateProvider
+      .state('home', {
+        url: '/home?section',
+        templateUrl: 'templates/home.tmpl',
+        controller: 'HomePageController',
+        controllerAs: 'homepageCtrl'
+      })
+      .state('whoscoming', {
+        url: '/whoscoming',
+        templateUrl: 'templates/whoscoming.html',
+        controller: 'WhoscomingController',
+        controllerAs: 'WhoscomingCtrl'
+      })
+      .state('edituser', {
+        url: '/editprofile?email&c',
+        templateUrl: 'templates/edituser.html',
+        controller: 'EditUserController',
+        controllerAs: 'editCtrl'
+      })
+      .state('resendmail', {
+        url: '/resend',
+        templateUrl: 'templates/resendmail.html',
+        controller: 'ResendMailController',
+        controllerAs: 'resendCtrl'
+      })
+      .state('about', {
+        url: '/about',
+        templateUrl: 'templates/about.html',
+        controller: 'AboutController',
+        controllerAs: 'AboutCtrl'
+      })
   }
 })()
