@@ -28403,8 +28403,9 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
     var self = this
     self.url = function (url) {
       var http = url.substring(0, 5)
-      if (http !== 'http')
+      if (http !== 'http') {
         return 'http://' + url
+      }
       return url
     }
     self.people = []
