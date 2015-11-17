@@ -9211,22 +9211,713 @@ return jQuery;
 
 /* global angular */
 /* global $ */
-/* global jQuery */
+/* global google */
 
 ;(function () {
   angular
-    .module('bcbk-app', [
-      'services.route',
-      'controller.homepage',
-      'controller.about',
-      'controller.register',
-      'controller.whoscoming',
-      'controller.edituser',
-      'controller.resend',
-      'directive.validation',
-      'directive.interestValidation'
-    // 'directive.navbar'
-    ])
+    .module('controller.about', [])
+    .controller('AboutController', AboutController)
+
+  AboutController.$inject = ['$scope', '$window']
+  function AboutController ($scope, $window) {
+  }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular
+    .module('controller.edituser', [])
+    .config(['uiSelectConfig', function (uiSelectConfig) {
+      uiSelectConfig.theme = 'bootstrap'
+    }])
+    .controller('EditUserController', EditUserController)
+
+  EditUserController.$inject = ['$scope', '$stateParams', '$http', '$state', '$q']
+  function EditUserController ($scope, $stateParams, $http, $state, $q) {
+    var self = this
+    self.interest = {'selected': []}
+    self.tmps = ['Java', 'DotA2', 'JavaScript', 'PHP', 'Phyton', 'AngularJS', 'NodeJS', 'C++', 'HTML', 'CSS', 'SASS', 'SCSS', 'ruby']
+    self.gender = {
+      type: 'select',
+      data: 'Male',
+      availableGender: ['Male', 'Female']
+    }
+    self.foodRequirement = {
+      type: 'select',
+      data: 'None',
+      available: ['None', 'Islam (อิสลาม)', 'Vegeterian (มังสวิรัติ)']
+    }
+    self.urlEmail = $stateParams.email
+    self.urlCode = $stateParams.c
+    self.submit = submit
+    self.editpage = editpage
+
+    var form = {
+      registerForm: $('#register-form'),
+      registerLoad: $('#loading'),
+      registerBtn: $('#register-btn'),
+      successForm: $('#success-registration'),
+      email: $('[name="email"]'),
+      emailStatus: $('#email-status'),
+      firstname: $('[name="firstname"]'),
+      firstnameStatus: $('#firstname-status'),
+      lastname: $('[name="lastname"]'),
+      lastnameStatus: $('#lastname-status')
+    }
+
+    init()
+    form.registerLoad.hide()
+    form.successForm.hide()
+
+    $('.nav a').each(function () {
+      $(this).on('click', function () {
+        $('.navbar-toggle').click()
+      })
+    })
+
+    function editpage () {
+      form.successForm.fadeOut(function () {
+        form.registerForm.fadeIn()
+      })
+      form.registerBtn.show()
+    }
+
+    function submit () {
+      if ($scope.$$childHead.edit.$invalid) {
+        if ($scope.$$childHead.edit.$error.required) {
+          angular.forEach($scope.register.$error.required, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.$$childHead.edit.$error.email) {
+          angular.forEach($scope.register.$error.email, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.$$childHead.edit.$error.emailvalid) {
+          angular.forEach($scope.register.$error.emailvalid, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.$$childHead.edit.$error.emailsame) {
+          angular.forEach($scope.register.$error.emailsame, function (value, key) {
+            value.$setDirty(true)
+          })
+        }
+      } else {
+        form.registerBtn.fadeOut(function () {
+          form.registerLoad.fadeIn()
+        })
+        var strInterest = self.interest.selected.join()
+        edit(strInterest).then(function (res, status) {
+          form.registerForm.fadeOut(function () {
+            form.registerLoad.hide()
+            form.successForm.fadeIn()
+            $scope.$$childHead.edit.$setPristine()
+          })
+        }, function (res, status) {})
+      }
+    }
+
+    function edit (strInterest) {
+      var deferred = $q.defer()
+      $http({
+        method: 'POST',
+        url: 'http://api.barcampbangkhen.org/edit',
+        data: {
+          'email': self.email,
+          'firstname': self.firstname,
+          'lastname': self.lastname,
+          'gender': self.gender.data,
+          'profession': self.profession,
+          'food_req': self.foodRequirement.data,
+          'food_allergy': self.allergy,
+          'interests': strInterest,
+          'twitter': self.twitter,
+          'website': self.website,
+          'workplace': self.workplace,
+          'unique_code': self.urlCode
+        }
+      }).success(function (response, status) {
+        deferred.resolve(response, status)
+      }).error(function (response, status) {
+        deferred.reject(response, status)
+      })
+      return deferred.promise
+    }
+
+    function init () {
+      var apiURL = 'http://api.barcampbangkhen.org/valid?'
+      $http({
+        method: 'GET',
+        url: apiURL + 'email=' + self.urlEmail + '&unique_code=' + self.urlCode
+      }).success(function (response, status) {
+        self.email = self.urlEmail
+        self.firstname = response.data.firstname
+        self.lastname = response.data.lastname
+        self.allergy = response.data.food_allergy
+        self.foodRequirement.data = response.data.food_req
+        self.gender.data = response.data.gender
+        self.profession = response.data.profession
+        self.twitter = response.data.twitter
+        self.workplace = response.data.workplace
+        self.website = response.data.website
+        self.interest.selected = response.data.interests.split(',')
+      }).error(function (response, status) {
+        $state.go('home')
+      })
+    }
+    $(window).scroll(function () {
+      if ($('.navbar').offset().top > 50) {
+        $('.navbar-fixed-top').addClass('top-nav-collapse')
+      } else {
+        $('.navbar-fixed-top').removeClass('top-nav-collapse')
+      }
+    })
+  }
+
+})()
+
+/* global angular */
+/* global $ */
+/* global google */
+
+;(function () {
+  angular
+    .module('controller.homepage', [])
+    .controller('HomePageController', HomePageController)
+
+  HomePageController.$inject = ['$scope', '$stateParams', '$timeout']
+  function HomePageController ($scope, $stateParams, $timeout) {
+    $(window).scroll(function () {
+      if ($('.navbar').offset().top > 50) {
+        $('.navbar-fixed-top').addClass('top-nav-collapse')
+      } else {
+        $('.navbar-fixed-top').removeClass('top-nav-collapse')
+      }
+    })
+
+    if ($stateParams.section) {
+      var checking = null
+      if (!checking) {
+        checking = $timeout(function () {
+          if ($('#' + $stateParams.section).offset().top) {
+            $('html, body').stop().animate({
+              scrollTop: $('#' + $stateParams.section).offset().top
+            }, 1500, 'easeInOutExpo')
+            checking = null
+          }
+        }, 500)
+      }
+    }
+
+    $(function () {
+      $('a.page-scroll').bind('click', function (event) {
+        var $anchor = $(this)
+        $('html, body').stop().animate({
+          scrollTop: $($anchor.attr('href')).offset().top
+        }, 1500, 'easeInOutExpo')
+        event.preventDefault()
+      })
+    })
+    if ($(window).width() < 768) {
+      $('.nav a').each(function () {
+        $(this).on('click', function () {
+          $('.navbar-toggle').click()
+        })
+      })
+    }
+  }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular
+    .module('controller.register', ['ui.select'])
+    .config(['uiSelectConfig', function (uiSelectConfig) {
+      uiSelectConfig.theme = 'bootstrap'
+    }])
+    .controller('RegisterController', RegisterController)
+
+  RegisterController.$inject = ['$scope', '$http', '$q']
+  function RegisterController ($scope, $http, $q) {
+    var self = this
+    self.interest = {'selected': []}
+    self.tmps = ['JavaScript', 'Dota2', 'startup', 'Food', 'Vim', 'UX/UI', 'NodeJs', 'Twitter', 'Web Design', 'AngularJs', 'Manga', 'SCSS', 'ruby']
+    self.regisSubmit = submit
+    self.regispage = regispage
+    self.gender = {
+      type: 'select',
+      data: 'Male',
+      availableGender: ['Male', 'Female']
+    }
+    self.foodRequirement = {
+      type: 'select',
+      data: 'None',
+      available: ['None', 'Islam (อิสลาม)', 'Vegeterian (มังสวิรัติ)']
+    }
+
+    var form = {
+      registerForm: $('#register-form'),
+      registerLoad: $('#loading'),
+      registerBtn: $('#register-btn'),
+      successForm: $('#success-registration'),
+      email: $('[name="email"]'),
+      emailStatus: $('#email-status'),
+      firstname: $('[name="firstname"]'),
+      firstnameStatus: $('#firstname-status'),
+      lastname: $('[name="lastname"]'),
+      lastnameStatus: $('#lastname-status')
+    }
+
+    form.registerLoad.hide()
+    form.successForm.hide()
+
+    function regispage () {
+      self.email = $scope.initial
+      self.firstname = $scope.initial
+      self.lastname = $scope.initial
+      self.gender.data = 'Male'
+      self.profession = $scope.initial
+      self.foodRequirement.data = 'None'
+      self.allergy = $scope.initial
+      self.interest.selected = []
+      self.twitter = $scope.initial
+      self.website = $scope.initial
+      self.workplace = $scope.initial
+      form.successForm.fadeOut(function () {
+        form.registerForm.fadeIn()
+      })
+      form.registerBtn.show()
+    }
+
+    function submit () {
+      if ($scope.register.$invalid) {
+        if ($scope.register.$error.required) {
+          angular.forEach($scope.register.$error.required, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.register.$error.email) {
+          angular.forEach($scope.register.$error.email, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.register.$error.pattern) {
+          angular.forEach($scope.register.$error.patter, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.register.$error.emailvalid) {
+          angular.forEach($scope.register.$error.emailvalid, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.register.$error.emailsame) {
+          angular.forEach($scope.register.$error.emailsame, function (value, key) {
+            value.$setDirty(true)
+          })
+        }
+        if ($scope.register.$error.empty) {
+          angular.forEach($scope.register.$error.empty, function (value, key) {
+            value.$setDirty(true)
+          })
+        }
+      } else {
+        form.registerBtn.fadeOut(function () {
+          form.registerLoad.fadeIn()
+        })
+        checkEmail().then(function () {
+          var strInterest = self.interest.selected.join()
+          register(strInterest).then(function (res, status) {
+            form.registerForm.fadeOut(function () {
+              form.registerLoad.hide()
+              form.successForm.fadeIn()
+              $scope.register.$setPristine()
+            })
+          }, function (res, status) {})
+        }, function (status) {})
+      }
+    }
+
+    function checkEmail () {
+      var deferred = $q.defer()
+      $http({
+        method: 'GET',
+        url: 'http://api.barcampbangkhen.org/checkemail?email=' + self.email
+      }).success(function (response, status) {
+        $scope.register.$setValidity('emailvalid', true)
+        $scope.register.$setValidity('emailsame', true)
+        deferred.resolve()
+      }).error(function (response, status) {
+        if (status === 401) {
+          $scope.register.$setValidity('emailvalid', false)
+        } else if (status === 402) {
+          $scope.register.$setValidity('emailsame', false)
+        }
+        deferred.reject(status)
+      })
+      return deferred.promise
+    }
+
+    function register (strInterest) {
+      var deferred = $q.defer()
+      $http({
+        method: 'POST',
+        url: 'http://api.barcampbangkhen.org/register',
+        data: {
+          'email': self.email,
+          'firstname': self.firstname,
+          'lastname': self.lastname,
+          'gender': self.gender.data,
+          'profession': self.profession,
+          'food_req': self.foodRequirement.data,
+          'food_allergy': self.allergy,
+          'interests': strInterest,
+          'twitter': self.twitter,
+          'website': self.website,
+          'workplace': self.workplace
+        }
+      }).success(function (response, status) {
+        deferred.resolve(response, status)
+      }).error(function (response, status) {
+        deferred.reject(response, status)
+      })
+      return deferred.promise
+    }
+
+  }
+
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular
+    .module('controller.resend', ['vcRecaptcha'])
+    .controller('ResendMailController', ResendMailController)
+
+  ResendMailController.$inject = ['$scope', '$http', '$q', 'vcRecaptchaService']
+  function ResendMailController ($scope, $http, $q, vcRecaptchaService) {
+    var self = this
+    self.model = {
+      key: '6Le75hATAAAAADVNCfVui0mQJ1OYV2XVAfsHXCoQ'
+    }
+    self.submit = {
+      isSubmit: false,
+      status: null
+    }
+
+    self.response = null
+    self.widgetId = null
+    self.resend = resend
+    self.setResponse = response
+    self.setWidgetId = setWidgetId
+    self.cbExpiration = cbExpiration
+
+    var form = {
+      resendForm: $('#resend-form'),
+      load: $('#loading'),
+      resendBtn: $('#resend-btn'),
+      successForm: $('#success-resend')
+    }
+
+    form.load.hide()
+    form.successForm.hide()
+
+    function resend () {
+      if ($scope.resend.$invalid) {
+        if ($scope.resend.$error.required) {
+          angular.forEach($scope.resend.$error.required, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.resend.$error.email) {
+          angular.forEach($scope.resend.$error.email, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.resend.$error.pattern) {
+          angular.forEach($scope.resend.$error.patter, function (value, key) {
+            value.$setDirty(true)
+          })
+        }
+      } else {
+        form.resendBtn.hide()
+        form.load.show()
+        self.submit.isSubmit = true
+        $http({
+          method: 'POST',
+          url: 'http://api.barcampbangkhen.org/resend',
+          data: {
+            email: self.email,
+            response: self.response
+          }
+        }).success(function (response, status) {
+          form.resendForm.fadeOut(function () {
+            form.load.hide()
+            form.successForm.fadeIn()
+          })
+          self.submit.status = status
+        }).error(function (response, status) {
+          self.submit.status = status
+          form.load.fadeOut(function () {
+            form.resendBtn.fadeIn()
+          })
+          if (status === 404) {
+            vcRecaptchaService.reload(self.widgetId)
+          }
+        })
+      }
+    }
+
+    function response (response) {
+      self.response = response
+    }
+
+    function setWidgetId (widgetId) {
+      self.widgetId = widgetId
+    }
+    function cbExpiration () {
+      self.response = null
+    }
+  }
+})()
+
+/* global angular */
+/* global $ */
+/* global google */
+
+;
+(function () {
+    angular
+        .module('controller.session', [])
+        .controller('SessionController', SessionController)
+
+    SessionController.$inject = ['$scope', '$window']
+    function SessionController($scope, $window) {
+    }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular
+    .module('controller.whoscoming', ['ui.select'])
+    .config(['uiSelectConfig', function (uiSelectConfig) {
+      uiSelectConfig.theme = 'bootstrap'
+    }])
+    .controller('WhoscomingController', WhoscomingController)
+
+  WhoscomingController.$inject = ['$scope', '$http']
+  function WhoscomingController ($scope, $http) {
+    $('.nav a').each(function () {
+      $(this).on('click', function () {
+        $('.navbar-toggle').click()
+      })
+    })
+
+    $(window).scroll(function () {
+      if ($('.navbar').offset().top > 50) {
+        $('.navbar-fixed-top').addClass('top-nav-collapse')
+      } else {
+        $('.navbar-fixed-top').removeClass('top-nav-collapse')
+      }
+    })
+
+    var self = this
+    self.url = function (url) {
+      if (url === null)
+        return
+      var http = url.substring(0, 4)
+      if (http !== 'http') {
+        return 'http://' + url
+      }
+      return url
+    }
+    self.people = []
+    self.interests = []
+    self.filter = {'selected': []}
+    self.find = function (obj, filter) {
+      if (filter.length === 0) {
+        return obj
+      }
+      filter = filter.map(function (item) {
+        return item.toLowerCase()
+      })
+      return obj.filter(function (x) {
+        return x.interests.some(function (y) {
+          return filter.indexOf(y.toLowerCase()) !== -1
+        })
+      })
+    }
+    $http.get('http://api.barcampbangkhen.org/all').success(function (response) {
+      self.interests = []
+      var data = response.data.reverse()
+      data = data.map(function (person) {
+        person.name = person.firstname + ' ' + person.lastname
+        person.interests = person.interests.split(/[ ]*,[ ]*/)
+        person.interests.forEach(function (interest) {
+          interest = interest.toLowerCase()
+          if (self.interests.indexOf(interest) === -1 && interest !== '') {
+            self.interests.push(interest)
+          }
+        })
+        return person
+      })
+      self.people = data
+    })
+  }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular.module('directive.validation', [])
+    .directive('emailcheck', emailcheck)
+
+  emailcheck.$inject = ['$http', '$timeout']
+  function emailcheck ($http, $timeout) {
+    var checking = null
+    return {
+      require: 'ngModel',
+      link: function (scope, ele, attrs, c) {
+        var checkEmail = function () {
+          var emailValue = c.$modelValue
+          if (!checking && emailValue) {
+            checking = $timeout(function () {
+              $http({
+                method: 'GET',
+                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
+              }).success(function (response, status) {
+                c.$setValidity('emailvalid', true)
+                c.$setValidity('emailsame', true)
+                checking = null
+              }).error(function (response, status) {
+                if (!c.$error.required || !c.$error.email) {
+                  if (status === 401) {
+                    c.$setValidity('emailsame', true)
+                    c.$setValidity('emailvalid', false)
+                  } else if (status === 402) {
+                    c.$setValidity('emailsame', false)
+                    c.$setValidity('emailvalid', true)
+                  }
+                  checking = null
+                }
+              })
+            }, 500)
+          } else {
+            c.$setValidity('emailvalid', true)
+            c.$setValidity('emailsame', true)
+          }
+        }
+        scope.$watch(attrs.ngModel, checkEmail)
+      }
+    }
+  }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular.module('directive.interestValidation', [])
+    .directive('interest', interest)
+
+  interest.$inject = ['$timeout']
+  function interest ($timeout) {
+    var checking = null
+    return {
+      require: 'ngModel',
+      link: function (scope, ele, attrs, c) {
+        scope.$watch(attrs.ngModel, function () {
+          checking = $timeout(function () {
+            if (!c.$modelValue) {
+              c.$setValidity('empty', false)
+            }else if (c.$modelValue.length === 0) {
+              c.$setValidity('empty', false)
+            } else {
+              c.$setValidity('empty', true)
+            }
+            checking = null
+          })
+        }, 500)
+      }
+    }
+  }
+})()
+
+/* global angular */
+
+;
+(function () {
+    angular
+        .module('services.route', ['ui.router'])
+        .config(config)
+
+    config.$inject = ['$stateProvider', '$urlRouterProvider']
+
+    function config($stateProvider, $urlRouterProvider) {
+        $urlRouterProvider.when('', '/home')
+        $urlRouterProvider.otherwise('/home')
+        $stateProvider
+            .state('home', {
+                url: '/home?section',
+                templateUrl: 'templates/home.tmpl',
+                controller: 'HomePageController',
+                controllerAs: 'homepageCtrl'
+            })
+            .state('whoscoming', {
+                url: '/whoscoming',
+                templateUrl: 'templates/whoscoming.html',
+                controller: 'WhoscomingController',
+                controllerAs: 'WhoscomingCtrl'
+            })
+            .state('edituser', {
+                url: '/editprofile?email&c',
+                templateUrl: 'templates/edituser.html',
+                controller: 'EditUserController',
+                controllerAs: 'editCtrl'
+            })
+            .state('resendmail', {
+                url: '/resend',
+                templateUrl: 'templates/resendmail.html',
+                controller: 'ResendMailController',
+                controllerAs: 'resendCtrl'
+            })
+            //.state('about', {
+            //    url: '/about',
+            //    templateUrl: 'templates/about.html',
+            //    controller: 'AboutController',
+            //    controllerAs: 'AboutCtrl'
+            //})
+            //.state('session', {
+            //    url: '/session',
+            //    templateUrl: 'templates/session.html',
+            //    controller: 'SessionController',
+            //    controllerAs: 'SessionCtrl'
+            //})
+    }
+})()
+
+/* global angular */
+/* global $ */
+/* global jQuery */
+
+;
+(function () {
+    angular
+        .module('bcbk-app', [
+            'services.route',
+            'controller.homepage',
+            'controller.about',
+            'controller.register',
+            'controller.whoscoming',
+            'controller.edituser',
+            'controller.resend',
+            'controller.session',
+            'directive.validation',
+            'directive.interestValidation'
+            // 'directive.navbar'
+        ])
 })()
 
 /*! jQuery UI - v1.11.4 - 2015-03-11
@@ -27777,670 +28468,3 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
   $templateCache.put('select2/match.tpl.html', '<a class="select2-choice ui-select-match" ng-class="{\'select2-default\': $select.isEmpty()}" ng-click="$select.toggle($event)" aria-label="{{ $select.baseTitle }} select"><span ng-show="$select.isEmpty()" class="select2-chosen">{{$select.placeholder}}</span> <span ng-hide="$select.isEmpty()" class="select2-chosen" ng-transclude=""></span> <abbr ng-if="$select.allowClear && !$select.isEmpty()" class="select2-search-choice-close" ng-click="$select.clear($event)"></abbr> <span class="select2-arrow ui-select-toggle"><b></b></span></a>')
   $templateCache.put('select2/select-multiple.tpl.html', '<div class="ui-select-container ui-select-multiple select2 select2-container select2-container-multi" ng-class="{\'select2-container-active select2-dropdown-open open\': $select.open, \'select2-container-disabled\': $select.disabled}"><ul class="select2-choices"><span class="ui-select-match"></span><li class="select2-search-field"><input type="text" autocomplete="false" autocorrect="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="true" aria-owns="ui-select-choices-{{ $select.generatedId }}" aria-label="{{ $select.baseTitle }}" aria-activedescendant="ui-select-choices-row-{{ $select.generatedId }}-{{ $select.activeIndex }}" class="select2-input ui-select-search" placeholder="{{$selectMultiple.getPlaceholder()}}" ng-disabled="$select.disabled" ng-hide="$select.disabled" ng-model="$select.search" ng-click="$select.activate()" style="width: 34px;" ondrop="return false;"></li></ul><div class="ui-select-dropdown select2-drop select2-with-searchbox select2-drop-active" ng-class="{\'select2-display-none\': !$select.open}"><div class="ui-select-choices"></div></div></div>')
   $templateCache.put('select2/select.tpl.html', '<div class="ui-select-container select2 select2-container" ng-class="{\'select2-container-active select2-dropdown-open open\': $select.open, \'select2-container-disabled\': $select.disabled, \'select2-container-active\': $select.focus, \'select2-allowclear\': $select.allowClear && !$select.isEmpty()}"><div class="ui-select-match"></div><div class="ui-select-dropdown select2-drop select2-with-searchbox select2-drop-active" ng-class="{\'select2-display-none\': !$select.open}"><div class="select2-search" ng-show="$select.searchEnabled"><input type="text" autocomplete="false" autocorrect="false" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="true" aria-owns="ui-select-choices-{{ $select.generatedId }}" aria-label="{{ $select.baseTitle }}" aria-activedescendant="ui-select-choices-row-{{ $select.generatedId }}-{{ $select.activeIndex }}" class="ui-select-search select2-input" ng-model="$select.search"></div><div class="ui-select-choices"></div></div></div>');}])
-
-/* global angular */
-/* global $ */
-/* global google */
-
-;(function () {
-  angular
-    .module('controller.about', [])
-    .controller('AboutController', AboutController)
-
-  AboutController.$inject = ['$scope', '$window']
-  function AboutController ($scope, $window) {
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular
-    .module('controller.edituser', [])
-    .config(['uiSelectConfig', function (uiSelectConfig) {
-      uiSelectConfig.theme = 'bootstrap'
-    }])
-    .controller('EditUserController', EditUserController)
-
-  EditUserController.$inject = ['$scope', '$stateParams', '$http', '$state', '$q']
-  function EditUserController ($scope, $stateParams, $http, $state, $q) {
-    var self = this
-    self.interest = {'selected': []}
-    self.tmps = ['Java', 'DotA2', 'JavaScript', 'PHP', 'Phyton', 'AngularJS', 'NodeJS', 'C++', 'HTML', 'CSS', 'SASS', 'SCSS', 'ruby']
-    self.gender = {
-      type: 'select',
-      data: 'Male',
-      availableGender: ['Male', 'Female']
-    }
-    self.foodRequirement = {
-      type: 'select',
-      data: 'None',
-      available: ['None', 'Islam (อิสลาม)', 'Vegeterian (มังสวิรัติ)']
-    }
-    self.urlEmail = $stateParams.email
-    self.urlCode = $stateParams.c
-    self.submit = submit
-    self.editpage = editpage
-
-    var form = {
-      registerForm: $('#register-form'),
-      registerLoad: $('#loading'),
-      registerBtn: $('#register-btn'),
-      successForm: $('#success-registration'),
-      email: $('[name="email"]'),
-      emailStatus: $('#email-status'),
-      firstname: $('[name="firstname"]'),
-      firstnameStatus: $('#firstname-status'),
-      lastname: $('[name="lastname"]'),
-      lastnameStatus: $('#lastname-status')
-    }
-
-    init()
-    form.registerLoad.hide()
-    form.successForm.hide()
-
-    $('.nav a').each(function () {
-      $(this).on('click', function () {
-        $('.navbar-toggle').click()
-      })
-    })
-
-    function editpage () {
-      form.successForm.fadeOut(function () {
-        form.registerForm.fadeIn()
-      })
-      form.registerBtn.show()
-    }
-
-    function submit () {
-      if ($scope.$$childHead.edit.$invalid) {
-        if ($scope.$$childHead.edit.$error.required) {
-          angular.forEach($scope.register.$error.required, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.$$childHead.edit.$error.email) {
-          angular.forEach($scope.register.$error.email, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.$$childHead.edit.$error.emailvalid) {
-          angular.forEach($scope.register.$error.emailvalid, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.$$childHead.edit.$error.emailsame) {
-          angular.forEach($scope.register.$error.emailsame, function (value, key) {
-            value.$setDirty(true)
-          })
-        }
-      } else {
-        form.registerBtn.fadeOut(function () {
-          form.registerLoad.fadeIn()
-        })
-        var strInterest = self.interest.selected.join()
-        edit(strInterest).then(function (res, status) {
-          form.registerForm.fadeOut(function () {
-            form.registerLoad.hide()
-            form.successForm.fadeIn()
-            $scope.$$childHead.edit.$setPristine()
-          })
-        }, function (res, status) {})
-      }
-    }
-
-    function edit (strInterest) {
-      var deferred = $q.defer()
-      $http({
-        method: 'POST',
-        url: 'http://api.barcampbangkhen.org/edit',
-        data: {
-          'email': self.email,
-          'firstname': self.firstname,
-          'lastname': self.lastname,
-          'gender': self.gender.data,
-          'profession': self.profession,
-          'food_req': self.foodRequirement.data,
-          'food_allergy': self.allergy,
-          'interests': strInterest,
-          'twitter': self.twitter,
-          'website': self.website,
-          'workplace': self.workplace,
-          'unique_code': self.urlCode
-        }
-      }).success(function (response, status) {
-        deferred.resolve(response, status)
-      }).error(function (response, status) {
-        deferred.reject(response, status)
-      })
-      return deferred.promise
-    }
-
-    function init () {
-      var apiURL = 'http://api.barcampbangkhen.org/valid?'
-      $http({
-        method: 'GET',
-        url: apiURL + 'email=' + self.urlEmail + '&unique_code=' + self.urlCode
-      }).success(function (response, status) {
-        self.email = self.urlEmail
-        self.firstname = response.data.firstname
-        self.lastname = response.data.lastname
-        self.allergy = response.data.food_allergy
-        self.foodRequirement.data = response.data.food_req
-        self.gender.data = response.data.gender
-        self.profession = response.data.profession
-        self.twitter = response.data.twitter
-        self.workplace = response.data.workplace
-        self.website = response.data.website
-        self.interest.selected = response.data.interests.split(',')
-      }).error(function (response, status) {
-        $state.go('home')
-      })
-    }
-    $(window).scroll(function () {
-      if ($('.navbar').offset().top > 50) {
-        $('.navbar-fixed-top').addClass('top-nav-collapse')
-      } else {
-        $('.navbar-fixed-top').removeClass('top-nav-collapse')
-      }
-    })
-  }
-
-})()
-
-/* global angular */
-/* global $ */
-/* global google */
-
-;(function () {
-  angular
-    .module('controller.homepage', [])
-    .controller('HomePageController', HomePageController)
-
-  HomePageController.$inject = ['$scope', '$stateParams', '$timeout']
-  function HomePageController ($scope, $stateParams, $timeout) {
-    $(window).scroll(function () {
-      if ($('.navbar').offset().top > 50) {
-        $('.navbar-fixed-top').addClass('top-nav-collapse')
-      } else {
-        $('.navbar-fixed-top').removeClass('top-nav-collapse')
-      }
-    })
-
-    if ($stateParams.section) {
-      var checking = null
-      if (!checking) {
-        checking = $timeout(function () {
-          if ($('#' + $stateParams.section).offset().top) {
-            $('html, body').stop().animate({
-              scrollTop: $('#' + $stateParams.section).offset().top
-            }, 1500, 'easeInOutExpo')
-            checking = null
-          }
-        }, 500)
-      }
-    }
-
-    $(function () {
-      $('a.page-scroll').bind('click', function (event) {
-        var $anchor = $(this)
-        $('html, body').stop().animate({
-          scrollTop: $($anchor.attr('href')).offset().top
-        }, 1500, 'easeInOutExpo')
-        event.preventDefault()
-      })
-    })
-    if ($(window).width() < 768) {
-      $('.nav a').each(function () {
-        $(this).on('click', function () {
-          $('.navbar-toggle').click()
-        })
-      })
-    }
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular
-    .module('controller.register', ['ui.select'])
-    .config(['uiSelectConfig', function (uiSelectConfig) {
-      uiSelectConfig.theme = 'bootstrap'
-    }])
-    .controller('RegisterController', RegisterController)
-
-  RegisterController.$inject = ['$scope', '$http', '$q']
-  function RegisterController ($scope, $http, $q) {
-    var self = this
-    self.interest = {'selected': []}
-    self.tmps = ['JavaScript', 'Dota2', 'startup', 'Food', 'Vim', 'UX/UI', 'NodeJs', 'Twitter', 'Web Design', 'AngularJs', 'Manga', 'SCSS', 'ruby']
-    self.regisSubmit = submit
-    self.regispage = regispage
-    self.gender = {
-      type: 'select',
-      data: 'Male',
-      availableGender: ['Male', 'Female']
-    }
-    self.foodRequirement = {
-      type: 'select',
-      data: 'None',
-      available: ['None', 'Islam (อิสลาม)', 'Vegeterian (มังสวิรัติ)']
-    }
-
-    var form = {
-      registerForm: $('#register-form'),
-      registerLoad: $('#loading'),
-      registerBtn: $('#register-btn'),
-      successForm: $('#success-registration'),
-      email: $('[name="email"]'),
-      emailStatus: $('#email-status'),
-      firstname: $('[name="firstname"]'),
-      firstnameStatus: $('#firstname-status'),
-      lastname: $('[name="lastname"]'),
-      lastnameStatus: $('#lastname-status')
-    }
-
-    form.registerLoad.hide()
-    form.successForm.hide()
-
-    function regispage () {
-      self.email = $scope.initial
-      self.firstname = $scope.initial
-      self.lastname = $scope.initial
-      self.gender.data = 'Male'
-      self.profession = $scope.initial
-      self.foodRequirement.data = 'None'
-      self.allergy = $scope.initial
-      self.interest.selected = []
-      self.twitter = $scope.initial
-      self.website = $scope.initial
-      self.workplace = $scope.initial
-      form.successForm.fadeOut(function () {
-        form.registerForm.fadeIn()
-      })
-      form.registerBtn.show()
-    }
-
-    function submit () {
-      if ($scope.register.$invalid) {
-        if ($scope.register.$error.required) {
-          angular.forEach($scope.register.$error.required, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.register.$error.email) {
-          angular.forEach($scope.register.$error.email, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.register.$error.pattern) {
-          angular.forEach($scope.register.$error.patter, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.register.$error.emailvalid) {
-          angular.forEach($scope.register.$error.emailvalid, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.register.$error.emailsame) {
-          angular.forEach($scope.register.$error.emailsame, function (value, key) {
-            value.$setDirty(true)
-          })
-        }
-        if ($scope.register.$error.empty) {
-          angular.forEach($scope.register.$error.empty, function (value, key) {
-            value.$setDirty(true)
-          })
-        }
-      } else {
-        form.registerBtn.fadeOut(function () {
-          form.registerLoad.fadeIn()
-        })
-        checkEmail().then(function () {
-          var strInterest = self.interest.selected.join()
-          register(strInterest).then(function (res, status) {
-            form.registerForm.fadeOut(function () {
-              form.registerLoad.hide()
-              form.successForm.fadeIn()
-              $scope.register.$setPristine()
-            })
-          }, function (res, status) {})
-        }, function (status) {})
-      }
-    }
-
-    function checkEmail () {
-      var deferred = $q.defer()
-      $http({
-        method: 'GET',
-        url: 'http://api.barcampbangkhen.org/checkemail?email=' + self.email
-      }).success(function (response, status) {
-        $scope.register.$setValidity('emailvalid', true)
-        $scope.register.$setValidity('emailsame', true)
-        deferred.resolve()
-      }).error(function (response, status) {
-        if (status === 401) {
-          $scope.register.$setValidity('emailvalid', false)
-        } else if (status === 402) {
-          $scope.register.$setValidity('emailsame', false)
-        }
-        deferred.reject(status)
-      })
-      return deferred.promise
-    }
-
-    function register (strInterest) {
-      var deferred = $q.defer()
-      $http({
-        method: 'POST',
-        url: 'http://api.barcampbangkhen.org/register',
-        data: {
-          'email': self.email,
-          'firstname': self.firstname,
-          'lastname': self.lastname,
-          'gender': self.gender.data,
-          'profession': self.profession,
-          'food_req': self.foodRequirement.data,
-          'food_allergy': self.allergy,
-          'interests': strInterest,
-          'twitter': self.twitter,
-          'website': self.website,
-          'workplace': self.workplace
-        }
-      }).success(function (response, status) {
-        deferred.resolve(response, status)
-      }).error(function (response, status) {
-        deferred.reject(response, status)
-      })
-      return deferred.promise
-    }
-
-  }
-
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular
-    .module('controller.resend', ['vcRecaptcha'])
-    .controller('ResendMailController', ResendMailController)
-
-  ResendMailController.$inject = ['$scope', '$http', '$q', 'vcRecaptchaService']
-  function ResendMailController ($scope, $http, $q, vcRecaptchaService) {
-    var self = this
-    self.model = {
-      key: '6Le75hATAAAAADVNCfVui0mQJ1OYV2XVAfsHXCoQ'
-    }
-    self.submit = {
-      isSubmit: false,
-      status: null
-    }
-
-    self.response = null
-    self.widgetId = null
-    self.resend = resend
-    self.setResponse = response
-    self.setWidgetId = setWidgetId
-    self.cbExpiration = cbExpiration
-
-    var form = {
-      resendForm: $('#resend-form'),
-      load: $('#loading'),
-      resendBtn: $('#resend-btn'),
-      successForm: $('#success-resend')
-    }
-
-    form.load.hide()
-    form.successForm.hide()
-
-    function resend () {
-      if ($scope.resend.$invalid) {
-        if ($scope.resend.$error.required) {
-          angular.forEach($scope.resend.$error.required, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.resend.$error.email) {
-          angular.forEach($scope.resend.$error.email, function (value, key) {
-            value.$setDirty(true)
-          })
-        } else if ($scope.resend.$error.pattern) {
-          angular.forEach($scope.resend.$error.patter, function (value, key) {
-            value.$setDirty(true)
-          })
-        }
-      } else {
-        form.resendBtn.hide()
-        form.load.show()
-        self.submit.isSubmit = true
-        $http({
-          method: 'POST',
-          url: 'http://api.barcampbangkhen.org/resend',
-          data: {
-            email: self.email,
-            response: self.response
-          }
-        }).success(function (response, status) {
-          form.resendForm.fadeOut(function () {
-            form.load.hide()
-            form.successForm.fadeIn()
-          })
-          self.submit.status = status
-        }).error(function (response, status) {
-          self.submit.status = status
-          form.load.fadeOut(function () {
-            form.resendBtn.fadeIn()
-          })
-          if (status === 404) {
-            vcRecaptchaService.reload(self.widgetId)
-          }
-        })
-      }
-    }
-
-    function response (response) {
-      self.response = response
-    }
-
-    function setWidgetId (widgetId) {
-      self.widgetId = widgetId
-    }
-    function cbExpiration () {
-      self.response = null
-    }
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular
-    .module('controller.whoscoming', ['ui.select'])
-    .config(['uiSelectConfig', function (uiSelectConfig) {
-      uiSelectConfig.theme = 'bootstrap'
-    }])
-    .controller('WhoscomingController', WhoscomingController)
-
-  WhoscomingController.$inject = ['$scope', '$http']
-  function WhoscomingController ($scope, $http) {
-    $('.nav a').each(function () {
-      $(this).on('click', function () {
-        $('.navbar-toggle').click()
-      })
-    })
-
-    $(window).scroll(function () {
-      if ($('.navbar').offset().top > 50) {
-        $('.navbar-fixed-top').addClass('top-nav-collapse')
-      } else {
-        $('.navbar-fixed-top').removeClass('top-nav-collapse')
-      }
-    })
-
-    var self = this
-    self.url = function (url) {
-      if (url === null)
-        return
-      var http = url.substring(0, 4)
-      if (http !== 'http') {
-        return 'http://' + url
-      }
-      return url
-    }
-    self.people = []
-    self.interests = []
-    self.filter = {'selected': []}
-    self.find = function (obj, filter) {
-      if (filter.length === 0) {
-        return obj
-      }
-      filter = filter.map(function (item) {
-        return item.toLowerCase()
-      })
-      return obj.filter(function (x) {
-        return x.interests.some(function (y) {
-          return filter.indexOf(y.toLowerCase()) !== -1
-        })
-      })
-    }
-    $http.get('http://api.barcampbangkhen.org/all').success(function (response) {
-      self.interests = []
-      var data = response.data.reverse()
-      data = data.map(function (person) {
-        person.name = person.firstname + ' ' + person.lastname
-        person.interests = person.interests.split(/[ ]*,[ ]*/)
-        person.interests.forEach(function (interest) {
-          interest = interest.toLowerCase()
-          if (self.interests.indexOf(interest) === -1 && interest !== '') {
-            self.interests.push(interest)
-          }
-        })
-        return person
-      })
-      self.people = data
-    })
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.validation', [])
-    .directive('emailcheck', emailcheck)
-
-  emailcheck.$inject = ['$http', '$timeout']
-  function emailcheck ($http, $timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        var checkEmail = function () {
-          var emailValue = c.$modelValue
-          if (!checking && emailValue) {
-            checking = $timeout(function () {
-              $http({
-                method: 'GET',
-                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
-              }).success(function (response, status) {
-                c.$setValidity('emailvalid', true)
-                c.$setValidity('emailsame', true)
-                checking = null
-              }).error(function (response, status) {
-                if (!c.$error.required || !c.$error.email) {
-                  if (status === 401) {
-                    c.$setValidity('emailsame', true)
-                    c.$setValidity('emailvalid', false)
-                  } else if (status === 402) {
-                    c.$setValidity('emailsame', false)
-                    c.$setValidity('emailvalid', true)
-                  }
-                  checking = null
-                }
-              })
-            }, 500)
-          } else {
-            c.$setValidity('emailvalid', true)
-            c.$setValidity('emailsame', true)
-          }
-        }
-        scope.$watch(attrs.ngModel, checkEmail)
-      }
-    }
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.interestValidation', [])
-    .directive('interest', interest)
-
-  interest.$inject = ['$timeout']
-  function interest ($timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        scope.$watch(attrs.ngModel, function () {
-          checking = $timeout(function () {
-            if (!c.$modelValue) {
-              c.$setValidity('empty', false)
-            }else if (c.$modelValue.length === 0) {
-              c.$setValidity('empty', false)
-            } else {
-              c.$setValidity('empty', true)
-            }
-            checking = null
-          })
-        }, 500)
-      }
-    }
-  }
-})()
-
-/* global angular */
-
-;(function () {
-  angular
-    .module('services.route', ['ui.router'])
-    .config(config)
-
-  config.$inject = ['$stateProvider', '$urlRouterProvider']
-
-  function config ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.when('', '/home')
-    $urlRouterProvider.otherwise('/home')
-    $stateProvider
-      .state('home', {
-        url: '/home?section',
-        templateUrl: 'templates/home.tmpl',
-        controller: 'HomePageController',
-        controllerAs: 'homepageCtrl'
-      })
-      .state('whoscoming', {
-        url: '/whoscoming',
-        templateUrl: 'templates/whoscoming.html',
-        controller: 'WhoscomingController',
-        controllerAs: 'WhoscomingCtrl'
-      })
-      .state('edituser', {
-        url: '/editprofile?email&c',
-        templateUrl: 'templates/edituser.html',
-        controller: 'EditUserController',
-        controllerAs: 'editCtrl'
-      })
-      .state('resendmail', {
-        url: '/resend',
-        templateUrl: 'templates/resendmail.html',
-        controller: 'ResendMailController',
-        controllerAs: 'resendCtrl'
-      })
-      .state('about', {
-        url: '/about',
-        templateUrl: 'templates/about.html',
-        controller: 'AboutController',
-        controllerAs: 'AboutCtrl'
-      })
-  }
-})()
