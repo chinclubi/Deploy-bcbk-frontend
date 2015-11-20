@@ -9226,7 +9226,8 @@ return jQuery;
             'controller.resend',
             'controller.session',
             'directive.validation',
-            'directive.interestValidation'
+            'directive.interestValidation',
+            'directive.findSession'
             // 'directive.navbar'
         ])
 })()
@@ -27782,6 +27783,127 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 
 /* global angular */
 /* global $ */
+
+;(function () {
+  angular.module('directive.validation', [])
+    .directive('emailcheck', emailcheck)
+
+  emailcheck.$inject = ['$http', '$timeout']
+  function emailcheck ($http, $timeout) {
+    var checking = null
+    return {
+      require: 'ngModel',
+      link: function (scope, ele, attrs, c) {
+        var checkEmail = function () {
+          var emailValue = c.$modelValue
+          if (!checking && emailValue) {
+            checking = $timeout(function () {
+              $http({
+                method: 'GET',
+                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
+              }).success(function (response, status) {
+                c.$setValidity('emailvalid', true)
+                c.$setValidity('emailsame', true)
+                checking = null
+              }).error(function (response, status) {
+                if (!c.$error.required || !c.$error.email) {
+                  if (status === 401) {
+                    c.$setValidity('emailsame', true)
+                    c.$setValidity('emailvalid', false)
+                  } else if (status === 402) {
+                    c.$setValidity('emailsame', false)
+                    c.$setValidity('emailvalid', true)
+                  }
+                  checking = null
+                }
+              })
+            }, 500)
+          } else {
+            c.$setValidity('emailvalid', true)
+            c.$setValidity('emailsame', true)
+          }
+        }
+        scope.$watch(attrs.ngModel, checkEmail)
+      }
+    }
+  }
+})()
+
+;
+(function () {
+    angular.module('directive.findSession', [])
+        .directive('findSession', findSession)
+
+    function findSession() {
+        return {
+            scope: {
+                'sessionRoom': '=sessionRoom',
+                'sessionTime': '=sessionTime',
+                'session': '=session'
+            },
+
+            controller: ['$scope', function ($scope) {
+
+                var searchScope = $scope;
+                while (searchScope['sessions'] === undefined && searchScope != $scope.$root) {
+                    searchScope = searchScope.$parent;
+                }
+
+                if (searchScope.sessions === undefined) {
+                    return;
+                }
+
+                searchScope.$watch('sessionsIndex', function (sessions) {
+                    if (!sessions) {
+                        return;
+                    }
+
+                    $scope.session = null;
+
+                    var slot = sessions[$scope.sessionTime];
+                    if (!slot) {
+                        return;
+                    }
+
+                    $scope.session = slot[$scope.sessionRoom];
+                });
+            }]
+        }
+    }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular.module('directive.interestValidation', [])
+    .directive('interest', interest)
+
+  interest.$inject = ['$timeout']
+  function interest ($timeout) {
+    var checking = null
+    return {
+      require: 'ngModel',
+      link: function (scope, ele, attrs, c) {
+        scope.$watch(attrs.ngModel, function () {
+          checking = $timeout(function () {
+            if (!c.$modelValue) {
+              c.$setValidity('empty', false)
+            }else if (c.$modelValue.length === 0) {
+              c.$setValidity('empty', false)
+            } else {
+              c.$setValidity('empty', true)
+            }
+            checking = null
+          })
+        }, 500)
+      }
+    }
+  }
+})()
+
+/* global angular */
+/* global $ */
 /* global google */
 
 ;(function () {
@@ -28261,24 +28383,86 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
         .module('controller.session', [])
         .controller('SessionController', SessionController)
 
-    SessionController.$inject = ['$scope', '$window']
-    function SessionController($scope, $window) {
+    var endpoint = 'sessions.json';
+
+    var index = function (data) {
+        var out = {};
+        angular.forEach(data, function (val) {
+            if (!out[val.slot]) {
+                out[val.slot] = {};
+            }
+            out[val.slot][val.room] = val;
+        });
+        return out;
+    };
+
+    SessionController.$inject = ['$scope', '$http']
+    function SessionController($scope, $http) {
 
         $scope.sessions = [];
         $scope.rooms = ['17201', '17302', '17303', '17304', '17401', '17402'];
         $scope.favorites = JSON.parse(localStorage.favorite || '{}');
         $scope.timeslots = [
-            '10:40 - 11:10',
-            '11:10 - 11:40',
-            '11:40 - 12:10',
-            '13:00 - 13:30',
-            '13:30 - 14:00',
-            '14:00 - 14:30',
-            '14:30 - 15:00',
-            '15:20 - 15:50',
-            '15:50 - 16:20',
-            '16:20 - 16:50'
+            '10:40 - 11:05',
+            '11:10 - 11:35',
+            '11:40 - 12:05',
+            '13:00 - 13:25',
+            '13:30 - 13.55',
+            '14:00 - 14:25',
+            '14:30 - 14:55',
+            '15:20 - 15:45',
+            '15:50 - 16:15',
+            '16:20 - 16:45'
         ];
+
+        var save = function () {
+            localStorage.favorite = JSON.stringify($scope.favorites);
+        };
+
+        var refreshFav = function () {
+            angular.forEach($scope.favorites, function (val, key) {
+                if (val.length > 0) {
+                    var id = val[0].id
+                    var session = $scope.sessions.filter(function (x) {
+                        return x.id === id;
+                    });
+                    if (session.length === 0) {
+                        $scope.favorites[key] = undefined;
+                        return;
+                    }
+                    if (session[0].slot != val[0].slot) {
+                        $scope.favorites[session[0].slot] = [session[0]];
+                        $scope.favorites[key] = undefined;
+                    } else {
+                        val[0] = session[0];
+                    }
+                }
+            });
+            save();
+        };
+
+        $scope.fav = function (session) {
+            if ($scope.isFav(session)) {
+                $scope.favorites[session.slot] = undefined;
+                return;
+            }
+            $scope.favorites[session.slot] = [session];
+            save();
+        };
+
+        $scope.isFav = function (session) {
+            return $scope.favorites[session.slot] && $scope.favorites[session.slot][0].id == session.id;
+        };
+
+        var refresh = function () {
+            $http.get(endpoint).success(function (data) {
+                $scope.sessions = data;
+                $scope.sessionsIndex = index(data);
+                refreshFav();
+            });
+        };
+
+        refresh();
     }
 })()
 /* global angular */
@@ -28350,84 +28534,6 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
       })
       self.people = data
     })
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.validation', [])
-    .directive('emailcheck', emailcheck)
-
-  emailcheck.$inject = ['$http', '$timeout']
-  function emailcheck ($http, $timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        var checkEmail = function () {
-          var emailValue = c.$modelValue
-          if (!checking && emailValue) {
-            checking = $timeout(function () {
-              $http({
-                method: 'GET',
-                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
-              }).success(function (response, status) {
-                c.$setValidity('emailvalid', true)
-                c.$setValidity('emailsame', true)
-                checking = null
-              }).error(function (response, status) {
-                if (!c.$error.required || !c.$error.email) {
-                  if (status === 401) {
-                    c.$setValidity('emailsame', true)
-                    c.$setValidity('emailvalid', false)
-                  } else if (status === 402) {
-                    c.$setValidity('emailsame', false)
-                    c.$setValidity('emailvalid', true)
-                  }
-                  checking = null
-                }
-              })
-            }, 500)
-          } else {
-            c.$setValidity('emailvalid', true)
-            c.$setValidity('emailsame', true)
-          }
-        }
-        scope.$watch(attrs.ngModel, checkEmail)
-      }
-    }
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.interestValidation', [])
-    .directive('interest', interest)
-
-  interest.$inject = ['$timeout']
-  function interest ($timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        scope.$watch(attrs.ngModel, function () {
-          checking = $timeout(function () {
-            if (!c.$modelValue) {
-              c.$setValidity('empty', false)
-            }else if (c.$modelValue.length === 0) {
-              c.$setValidity('empty', false)
-            } else {
-              c.$setValidity('empty', true)
-            }
-            checking = null
-          })
-        }, 500)
-      }
-    }
   }
 })()
 
