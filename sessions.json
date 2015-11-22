@@ -209,17 +209,17 @@
   },
   {
     "id": 39,
-    "name": "",
+    "name": "ประสบการณ์กว่า 15 ปี ที่เขาเรียกว่า Startup",
     "room": "17303",
-    "by": "",
+    "by": "สำเร็จ",
     "slot": "13:30 - 13:55",
     "double": false
   },
   {
     "id": 41,
-    "name": "",
+    "name": "Three Tech Talk ทอร์กไอทีโดยมุมมองของ 3 สาวก",
     "room": "17304",
-    "by": "",
+    "by": "@Betcon + friends",
     "slot": "13:30 - 13:55",
     "double": false
   },
@@ -243,7 +243,7 @@
     "id": 26,
     "name": "Let's talk Anime จับกระแสการ์ตูน anime พร้อมช่องทางดูฟรี",
     "room": "17201",
-    "by": "awm2u",
+    "by": "aum2u",
     "slot": "14:00 - 14:25",
     "double": false
   },
@@ -265,25 +265,25 @@
   },
   {
     "id": 42,
-    "name": "",
+    "name": "แอพเส้นทางรถเมล์กับเรื่องที่ต้องทำใจ(มีอะไรบ้าง)",
     "room": "17304",
-    "by": "",
+    "by": "@wissarut106",
     "slot": "14:00 - 14:25",
     "double": false
   },
   {
     "id": 43,
-    "name": "",
+    "name": "มาเป็นทาสแมวกัน",
     "room": "17401",
-    "by": "",
+    "by": "@ChameleomTK",
     "slot": "14:00 - 14:25",
     "double": false
   },
   {
     "id": 48,
-    "name": "",
+    "name": "เรียนรู้วิธีเรียนรู้ #notechnical #noprogramming",
     "room": "17402",
-    "by": "",
+    "by": "ลุงตู่ @dsatoji",
     "slot": "14:00 - 14:25",
     "double": false
   },
@@ -305,33 +305,33 @@
   },
   {
     "id": 32,
-    "name": "",
+    "name": "Git & Github (Basic มั้ง)",
     "room": "17303",
-    "by": "",
+    "by": "@kanitkornk",
     "slot": "14:30 - 14:55",
     "double": false
   },
   {
     "id": 49,
-    "name": "",
+    "name": "How to simulate Ocean 101",
     "room": "17304",
-    "by": "",
+    "by": "takkasila",
     "slot": "14:30 - 14:55",
     "double": false
   },
   {
     "id": 50,
-    "name": "",
+    "name": "Slimmer iOS's ViewController with MVVM and RxSwift",
     "room": "17401",
-    "by": "",
+    "by": "@offfffz",
     "slot": "14:30 - 14:55",
     "double": false
   },
   {
     "id": 51,
-    "name": "",
+    "name": "Barcamp บางเขน VS บางกอก ความเหมือนและความแตกต่าง (Discussion)",
     "room": "17402",
-    "by": "",
+    "by": "Aqua V",
     "slot": "14:30 - 14:55",
     "double": false
   }
