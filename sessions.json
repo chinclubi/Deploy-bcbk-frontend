@@ -382,5 +382,101 @@
     "by": "mr_ta",
     "slot": "15:20 - 15:45",
     "double": false
+  },
+  {
+    "id": 35,
+    "name": "Hack เว็บรัฐไทยอย่างไรให้ถูก(กฎหมา(ย))",
+    "room": "17201",
+    "by": "@jeremyfanclub",
+    "slot": "15:50 - 16:15",
+    "double": false
+  },
+  {
+    "id": 55,
+    "name": "Firefox browser/OPS + Rust",
+    "room": "17302",
+    "by": "VEE SATAYAMAS",
+    "slot": "15:50 - 16:15",
+    "double": false
+  },
+  {
+    "id": 58,
+    "name": "THE FACE THAILAND or fake?",
+    "room": "17303",
+    "by": "@mangokarn",
+    "slot": "15:50 - 16:15",
+    "double": false
+  },
+  {
+    "id": 59,
+    "name": "ทำไม Product (Project) ถึง Delay! Deadline vs Quality 1",
+    "room": "17304",
+    "by": "CPE19 Levelup",
+    "slot": "15:50 - 16:15",
+    "double": false
+  },
+  {
+    "id": 60,
+    "name": "How to perfect? แต่งรูปให้สวยใสสไตล์เน็ตไอดอล",
+    "room": "17401",
+    "by": "@SamkmBF",
+    "slot": "15:50 - 16:15",
+    "double": false
+  },
+  {
+    "id": 65,
+    "name": "ความสำคัญของการสร้างแลนด์มา์ค",
+    "room": "17402",
+    "by": "Aqua V.",
+    "slot": "15:50 - 16:15",
+    "double": false
+  },
+  {
+    "id": 37,
+    "name": "การทำเกมส์ไม่ได้ใช้แค่การเขียนโปรแกรม",
+    "room": "17201",
+    "by": "Gaming Idea",
+    "slot": "16:20 - 16:45",
+    "double": false
+  },
+  {
+    "id": 62,
+    "name": "เป็น DJ มันเจ็บปวด!! (รวมทุกเรื่องดีและร้ายในวงการ DJ ไทย)",
+    "room": "17302",
+    "by": "@dotnfo",
+    "slot": "16:20 - 16:45",
+    "double": false
+  },
+  {
+    "id": 66,
+    "name": "Progress Web App",
+    "room": "17303",
+    "by": "@kanitkornk",
+    "slot": "16:20 - 16:45",
+    "double": false
+  },
+  {
+    "id": 64,
+    "name": "ทำไม Product (Project) ถึง Delay? Deadline vs Quality 2",
+    "room": "17304",
+    "by": "CPE19 Levelup",
+    "slot": "16:20 - 16:45",
+    "double": false
+  },
+  {
+    "id": 61,
+    "name": "E85: Should you use it? (TH)",
+    "room": "17401",
+    "by": "@Lattefrappe",
+    "slot": "16:20 - 16:45",
+    "double": false
+  },
+  {
+    "id": 63,
+    "name": "Fabric: Make your DevOps life better (TH)",
+    "room": "17402",
+    "by": "@zKanCS",
+    "slot": "16:20 - 16:45",
+    "double": false
   }
 ]
