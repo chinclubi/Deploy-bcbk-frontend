@@ -9213,24 +9213,23 @@ return jQuery;
 /* global $ */
 /* global jQuery */
 
-;(function () {
-  angular
-    .module('bcbk-app', [
-      'services.route',
-      'controller.homepage',
-      'controller.about',
-      'controller.register',
-      'controller.whoscoming',
-      'controller.edituser',
-      'directive.validation',
-      'directive.interestValidation'
-    // 'directive.navbar'
-    ])
-  $(window).resize(function () {
-    console.log('resize')
-    $('#bg').height($(window).height() + 60)
-  })
-
+;
+(function () {
+    angular
+        .module('bcbk-app', [
+            'services.route',
+            'controller.homepage',
+            'controller.about',
+            'controller.register',
+            'controller.whoscoming',
+            'controller.edituser',
+            'controller.resend',
+            'controller.session',
+            'directive.validation',
+            'directive.interestValidation',
+            'directive.findSession'
+            // 'directive.navbar'
+        ])
 })()
 
 /*! jQuery UI - v1.11.4 - 2015-03-11
@@ -27939,6 +27938,13 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
         $state.go('home')
       })
     }
+    $(window).scroll(function () {
+      if ($('.navbar').offset().top > 50) {
+        $('.navbar-fixed-top').addClass('top-nav-collapse')
+      } else {
+        $('.navbar-fixed-top').removeClass('top-nav-collapse')
+      }
+    })
   }
 
 })()
@@ -28068,12 +28074,21 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
           angular.forEach($scope.register.$error.email, function (value, key) {
             value.$setDirty(true)
           })
+        } else if ($scope.register.$error.pattern) {
+          angular.forEach($scope.register.$error.patter, function (value, key) {
+            value.$setDirty(true)
+          })
         } else if ($scope.register.$error.emailvalid) {
           angular.forEach($scope.register.$error.emailvalid, function (value, key) {
             value.$setDirty(true)
           })
         } else if ($scope.register.$error.emailsame) {
           angular.forEach($scope.register.$error.emailsame, function (value, key) {
+            value.$setDirty(true)
+          })
+        }
+        if ($scope.register.$error.empty) {
+          angular.forEach($scope.register.$error.empty, function (value, key) {
             value.$setDirty(true)
           })
         }
@@ -28097,9 +28112,8 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
     function checkEmail () {
       var deferred = $q.defer()
       $http({
-        method: 'POST',
-        url: 'http://api.barcampbangkhen.org/checkemail',
-        data: {'email': self.email}
+        method: 'GET',
+        url: 'http://api.barcampbangkhen.org/checkemail?email=' + self.email
       }).success(function (response, status) {
         $scope.register.$setValidity('emailvalid', true)
         $scope.register.$setValidity('emailsame', true)
@@ -28150,6 +28164,192 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 
 ;(function () {
   angular
+    .module('controller.resend', ['vcRecaptcha'])
+    .controller('ResendMailController', ResendMailController)
+
+  ResendMailController.$inject = ['$scope', '$http', '$q', 'vcRecaptchaService']
+  function ResendMailController ($scope, $http, $q, vcRecaptchaService) {
+    var self = this
+    self.model = {
+      key: '6Le75hATAAAAADVNCfVui0mQJ1OYV2XVAfsHXCoQ'
+    }
+    self.submit = {
+      isSubmit: false,
+      status: null
+    }
+
+    self.response = null
+    self.widgetId = null
+    self.resend = resend
+    self.setResponse = response
+    self.setWidgetId = setWidgetId
+    self.cbExpiration = cbExpiration
+
+    var form = {
+      resendForm: $('#resend-form'),
+      load: $('#loading'),
+      resendBtn: $('#resend-btn'),
+      successForm: $('#success-resend')
+    }
+
+    form.load.hide()
+    form.successForm.hide()
+
+    function resend () {
+      if ($scope.resend.$invalid) {
+        if ($scope.resend.$error.required) {
+          angular.forEach($scope.resend.$error.required, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.resend.$error.email) {
+          angular.forEach($scope.resend.$error.email, function (value, key) {
+            value.$setDirty(true)
+          })
+        } else if ($scope.resend.$error.pattern) {
+          angular.forEach($scope.resend.$error.patter, function (value, key) {
+            value.$setDirty(true)
+          })
+        }
+      } else {
+        form.resendBtn.hide()
+        form.load.show()
+        self.submit.isSubmit = true
+        $http({
+          method: 'POST',
+          url: 'http://api.barcampbangkhen.org/resend',
+          data: {
+            email: self.email,
+            response: self.response
+          }
+        }).success(function (response, status) {
+          form.resendForm.fadeOut(function () {
+            form.load.hide()
+            form.successForm.fadeIn()
+          })
+          self.submit.status = status
+        }).error(function (response, status) {
+          self.submit.status = status
+          form.load.fadeOut(function () {
+            form.resendBtn.fadeIn()
+          })
+          if (status === 404) {
+            vcRecaptchaService.reload(self.widgetId)
+          }
+        })
+      }
+    }
+
+    function response (response) {
+      self.response = response
+    }
+
+    function setWidgetId (widgetId) {
+      self.widgetId = widgetId
+    }
+    function cbExpiration () {
+      self.response = null
+    }
+  }
+})()
+
+/* global angular */
+/* global $ */
+/* global google */
+
+;
+(function () {
+    angular
+        .module('controller.session', [])
+        .controller('SessionController', SessionController)
+
+    var endpoint = 'sessions.json';
+
+    var index = function (data) {
+        var out = {};
+        angular.forEach(data, function (val) {
+            if (!out[val.slot]) {
+                out[val.slot] = {};
+            }
+            out[val.slot][val.room] = val;
+        });
+        return out;
+    };
+
+    SessionController.$inject = ['$scope', '$http']
+    function SessionController($scope, $http) {
+
+        $scope.sessions = [];
+        $scope.rooms = ['17201', '17302', '17303', '17304', '17401', '17402'];
+        $scope.favorites = JSON.parse(localStorage.favorite || '{}');
+        $scope.timeslots = [
+            '10:40 - 11:05',
+            '11:10 - 11:35',
+            '11:40 - 12:05',
+            '13:00 - 13:25',
+            '13:30 - 13.55',
+            '14:00 - 14:25',
+            '14:30 - 14:55',
+            '15:20 - 15:45',
+            '15:50 - 16:15',
+            '16:20 - 16:45'
+        ];
+
+        var save = function () {
+            localStorage.favorite = JSON.stringify($scope.favorites);
+        };
+
+        var refreshFav = function () {
+            angular.forEach($scope.favorites, function (val, key) {
+                if (val.length > 0) {
+                    var id = val[0].id
+                    var session = $scope.sessions.filter(function (x) {
+                        return x.id === id;
+                    });
+                    if (session.length === 0) {
+                        $scope.favorites[key] = undefined;
+                        return;
+                    }
+                    if (session[0].slot != val[0].slot) {
+                        $scope.favorites[session[0].slot] = [session[0]];
+                        $scope.favorites[key] = undefined;
+                    } else {
+                        val[0] = session[0];
+                    }
+                }
+            });
+            save();
+        };
+
+        $scope.fav = function (session) {
+            if ($scope.isFav(session)) {
+                $scope.favorites[session.slot] = undefined;
+                return;
+            }
+            $scope.favorites[session.slot] = [session];
+            save();
+        };
+
+        $scope.isFav = function (session) {
+            return $scope.favorites[session.slot] && $scope.favorites[session.slot][0].id == session.id;
+        };
+
+        var refresh = function () {
+            $http.get(endpoint).success(function (data) {
+                $scope.sessions = data;
+                $scope.sessionsIndex = index(data);
+                refreshFav();
+            });
+        };
+
+        refresh();
+    }
+})()
+
+/* global angular */
+/* global $ */
+
+;(function () {
+  angular
     .module('controller.whoscoming', ['ui.select'])
     .config(['uiSelectConfig', function (uiSelectConfig) {
       uiSelectConfig.theme = 'bootstrap'
@@ -28173,6 +28373,15 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
     })
 
     var self = this
+    self.url = function (url) {
+      if (url === null)
+        return
+      var http = url.substring(0, 4)
+      if (http !== 'http') {
+        return 'http://' + url
+      }
+      return url
+    }
     self.people = []
     self.interests = []
     self.filter = {'selected': []}
@@ -28189,9 +28398,10 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
         })
       })
     }
-    $http.get('http://api.barcampbangkhen.org/all').success(function (data) {
+    $http.get('http://api.barcampbangkhen.org/all').success(function (response) {
       self.interests = []
-      data = data.data.map(function (person) {
+      var data = response.data.reverse()
+      data = data.map(function (person) {
         person.name = person.firstname + ' ' + person.lastname
         person.interests = person.interests.split(/[ ]*,[ ]*/)
         person.interests.forEach(function (interest) {
@@ -28217,43 +28427,85 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
   emailcheck.$inject = ['$http', '$timeout']
   function emailcheck ($http, $timeout) {
     var checking = null
-    var form = {
-      email: $('[name="email"]'),
-      emailStatus: $('#email-status')
-    }
     return {
       require: 'ngModel',
       link: function (scope, ele, attrs, c) {
         var checkEmail = function () {
-          if (!checking && c.$modelValue) {
+          var emailValue = c.$modelValue
+          if (!checking && emailValue) {
             checking = $timeout(function () {
               $http({
-                method: 'POST',
-                url: 'http://api.barcampbangkhen.org/checkemail',
-                data: {'email': c.$modelValue}
+                method: 'GET',
+                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
               }).success(function (response, status) {
-                form.emailStatus.text('')
-                form.emailStatus.hide()
                 c.$setValidity('emailvalid', true)
                 c.$setValidity('emailsame', true)
                 checking = null
               }).error(function (response, status) {
-                if (status === 401) {
-                  c.$setValidity('emailsame', true)
-                  c.$setValidity('emailvalid', false)
-                } else if (status === 402) {
-                  c.$setValidity('emailsame', false)
-                  c.$setValidity('emailvalid', true)
+                if (!c.$error.required || !c.$error.email) {
+                  if (status === 401) {
+                    c.$setValidity('emailsame', true)
+                    c.$setValidity('emailvalid', false)
+                  } else if (status === 402) {
+                    c.$setValidity('emailsame', false)
+                    c.$setValidity('emailvalid', true)
+                  }
+                  checking = null
                 }
-                checking = null
               })
             }, 500)
+          } else {
+            c.$setValidity('emailvalid', true)
+            c.$setValidity('emailsame', true)
           }
         }
         scope.$watch(attrs.ngModel, checkEmail)
       }
     }
   }
+})()
+
+;
+(function () {
+    angular.module('directive.findSession', [])
+        .directive('findSession', findSession)
+
+    function findSession() {
+        return {
+            scope: {
+                'sessionRoom': '=sessionRoom',
+                'sessionTime': '=sessionTime',
+                'session': '=session'
+            },
+
+            controller: ['$scope', function ($scope) {
+
+                var searchScope = $scope;
+                while (searchScope['sessions'] === undefined && searchScope != $scope.$root) {
+                    searchScope = searchScope.$parent;
+                }
+
+                if (searchScope.sessions === undefined) {
+                    return;
+                }
+
+                searchScope.$watch('sessionsIndex', function (sessions) {
+                    if (!sessions) {
+                        return;
+                    }
+
+                    $scope.session = null;
+
+                    var slot = sessions[$scope.sessionTime];
+                    if (!slot) {
+                        return;
+                    }
+
+                    $scope.session = slot[$scope.sessionRoom];
+                });
+            }]
+        }
+    }
 })()
 
 /* global angular */
@@ -28272,11 +28524,11 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
         scope.$watch(attrs.ngModel, function () {
           checking = $timeout(function () {
             if (!c.$modelValue) {
-              c.$setValidity('required', false)
+              c.$setValidity('empty', false)
             }else if (c.$modelValue.length === 0) {
-              c.$setValidity('required', false)
+              c.$setValidity('empty', false)
             } else {
-              c.$setValidity('required', true)
+              c.$setValidity('empty', true)
             }
             checking = null
           })
@@ -28288,40 +28540,53 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 
 /* global angular */
 
-;(function () {
+;
+(function () {
     angular
         .module('services.route', ['ui.router'])
         .config(config)
 
     config.$inject = ['$stateProvider', '$urlRouterProvider']
 
-  function config ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.when('', '/home')
-    $urlRouterProvider.otherwise('/home')
-    $stateProvider
-      .state('home', {
-        url: '/home?section',
-        templateUrl: 'templates/home.tmpl',
-        controller: 'HomePageController',
-        controllerAs: 'homepageCtrl'
-      })
-      .state('whoscoming', {
-        url: '/whoscoming',
-        templateUrl: 'templates/whoscoming.html',
-        controller: 'WhoscomingController',
-        controllerAs: 'WhoscomingCtrl'
-      })
-      .state('edituser', {
-        url: '/editprofile?email&c',
-        templateUrl: 'templates/edituser.html',
-        controller: 'EditUserController',
-        controllerAs: 'editCtrl'
-      })
-      .state('about', {
-        url: '/about',
-        templateUrl: 'templates/about.html',
-        controller: 'AboutController',
-        controllerAs: 'AboutCtrl'
-      })
-  }
+    function config($stateProvider, $urlRouterProvider) {
+        $urlRouterProvider.when('', '/home')
+        $urlRouterProvider.otherwise('/home')
+        $stateProvider
+            .state('home', {
+                url: '/home?section',
+                templateUrl: 'templates/home.tmpl',
+                controller: 'HomePageController',
+                controllerAs: 'homepageCtrl'
+            })
+            .state('whoscoming', {
+                url: '/whoscoming',
+                templateUrl: 'templates/whoscoming.html',
+                controller: 'WhoscomingController',
+                controllerAs: 'WhoscomingCtrl'
+            })
+            .state('edituser', {
+                url: '/editprofile?email&c',
+                templateUrl: 'templates/edituser.html',
+                controller: 'EditUserController',
+                controllerAs: 'editCtrl'
+            })
+            .state('resendmail', {
+                url: '/resend',
+                templateUrl: 'templates/resendmail.html',
+                controller: 'ResendMailController',
+                controllerAs: 'resendCtrl'
+            })
+            //.state('about', {
+            //    url: '/about',
+            //    templateUrl: 'templates/about.html',
+            //    controller: 'AboutController',
+            //    controllerAs: 'AboutCtrl'
+            //})
+            .state('session', {
+               url: '/session',
+               templateUrl: 'templates/session.html',
+               controller: 'SessionController',
+               controllerAs: 'SessionCtrl'
+            })
+    }
 })()
