@@ -28286,7 +28286,7 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
             '11:10 - 11:35',
             '11:40 - 12:05',
             '13:00 - 13:25',
-            '13:30 - 13.55',
+            '13:30 - 13:55',
             '14:00 - 14:25',
             '14:30 - 14:55',
             '15:20 - 15:45',
@@ -28547,106 +28547,6 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
 
   config.$inject = ['$stateProvider', '$urlRouterProvider']
 
-  function config ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.when('', '/home')
-    $urlRouterProvider.otherwise('/home')
-    $stateProvider
-      .state('home', {
-        url: '/home?section',
-        templateUrl: 'templates/home.tmpl',
-        controller: 'HomePageController',
-        controllerAs: 'homepageCtrl'
-      })
-      .state('whoscoming', {
-        url: '/whoscoming',
-        templateUrl: 'templates/whoscoming.html',
-        controller: 'WhoscomingController',
-        controllerAs: 'WhoscomingCtrl'
-      })
-      .state('edituser', {
-        url: '/editprofile?email&c',
-        templateUrl: 'templates/edituser.html',
-        controller: 'EditUserController',
-        controllerAs: 'editCtrl'
-      })
-      .state('resendmail', {
-        url: '/resend',
-        templateUrl: 'templates/resendmail.html',
-        controller: 'ResendMailController',
-        controllerAs: 'resendCtrl'
-      })
-      // .state('about', {
-      //    url: '/about',
-      //    templateUrl: 'templates/about.html',
-      //    controller: 'AboutController',
-      //    controllerAs: 'AboutCtrl'
-      // })
-      .state('session', {
-        url: '/session',
-        templateUrl: 'templates/session.html',
-        controller: 'SessionController',
-        controllerAs: 'SessionCtrl'
-      })
-  }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.validation', [])
-    .directive('emailcheck', emailcheck)
-
-  emailcheck.$inject = ['$http', '$timeout']
-  function emailcheck ($http, $timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        var checkEmail = function () {
-          var emailValue = c.$modelValue
-          if (!checking && emailValue) {
-            checking = $timeout(function () {
-              $http({
-                method: 'GET',
-                url: 'http://api.barcampbangkhen.org/checkemail?email=' + emailValue
-              }).success(function (response, status) {
-                c.$setValidity('emailvalid', true)
-                c.$setValidity('emailsame', true)
-                checking = null
-              }).error(function (response, status) {
-                if (!c.$error.required || !c.$error.email) {
-                  if (status === 401) {
-                    c.$setValidity('emailsame', true)
-                    c.$setValidity('emailvalid', false)
-                  } else if (status === 402) {
-                    c.$setValidity('emailsame', false)
-                    c.$setValidity('emailvalid', true)
-                  }
-                  checking = null
-                }
-              })
-            }, 500)
-          } else {
-            c.$setValidity('emailvalid', true)
-            c.$setValidity('emailsame', true)
-          }
-        }
-        scope.$watch(attrs.ngModel, checkEmail)
-      }
-    }
-  }
-})()
-
-;
-(function () {
-<<<<<<< 1fef8577cc0308726be06d047255dcd047b2b8ff
-    angular
-        .module('services.route', ['ui.router'])
-        .config(config)
-
-    config.$inject = ['$stateProvider', '$urlRouterProvider']
-
     function config($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.when('', '/home')
         $urlRouterProvider.otherwise('/home')
@@ -28687,75 +28587,5 @@ angular.module('ui.select').run(['$templateCache', function ($templateCache) {$t
                 controller: 'SessionController',
                 controllerAs: 'SessionCtrl'
             })
-=======
-    angular.module('directive.findSession', [])
-        .directive('findSession', findSession)
-
-    function findSession() {
-        return {
-            scope: {
-                'sessionRoom': '=sessionRoom',
-                'sessionTime': '=sessionTime',
-                'session': '=session'
-            },
-
-            controller: ['$scope', function ($scope) {
-
-                var searchScope = $scope;
-                while (searchScope['sessions'] === undefined && searchScope != $scope.$root) {
-                    searchScope = searchScope.$parent;
-                }
-
-                if (searchScope.sessions === undefined) {
-                    return;
-                }
-
-                searchScope.$watch('sessionsIndex', function (sessions) {
-                    if (!sessions) {
-                        return;
-                    }
-
-                    $scope.session = null;
-
-                    var slot = sessions[$scope.sessionTime];
-                    if (!slot) {
-                        return;
-                    }
-
-                    $scope.session = slot[$scope.sessionRoom];
-                });
-            }]
-        }
->>>>>>> 1598e2a16d3a55db8d72b7d2dfd6aea564adfad8
     }
-})()
-
-/* global angular */
-/* global $ */
-
-;(function () {
-  angular.module('directive.interestValidation', [])
-    .directive('interest', interest)
-
-  interest.$inject = ['$timeout']
-  function interest ($timeout) {
-    var checking = null
-    return {
-      require: 'ngModel',
-      link: function (scope, ele, attrs, c) {
-        scope.$watch(attrs.ngModel, function () {
-          checking = $timeout(function () {
-            if (!c.$modelValue) {
-              c.$setValidity('empty', false)
-            }else if (c.$modelValue.length === 0) {
-              c.$setValidity('empty', false)
-            } else {
-              c.$setValidity('empty', true)
-            }
-            checking = null
-          })
-        }, 500)
-      }
-    }
-  }
 })()
